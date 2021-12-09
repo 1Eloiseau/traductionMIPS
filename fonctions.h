@@ -8,6 +8,6 @@
 
 bool lireFichier(char nomFichier[], char ligne[], int numeroLigne);
 void ecrireFichier(char nomFichier[], char donnees[]);
-
+void intEnChar(int instruction, char ligneHexa[]);
 
 #endif

@@ -1,5 +1,5 @@
 #include "fonctions.h"
-void intEnChar(int instruction, char ligneHexa[]);
+
 int main(int argc, char * argv[])
 {
 	char fichierSource[] = "in.txt";
