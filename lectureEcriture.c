@@ -1,34 +1,36 @@
 #include "fonctions.h"
 
 //lit la ligne du fichier (de numéro(commence à 1) passé en parametre), sans \n
-//retourne 1 si la ligne existe, 0 sinon
-bool lireFichier(char nomFichier[], char ligne[], int numeroLigne)
+//retourne 1 si la ligne existe, 0 si elle est vide/commentaire, -1 sinon (fin du fichier)
+int lireFichier(char nomFichier[], char ligne[], int numeroLigne)
 {
 	FILE *  fichier = fopen(nomFichier, "r");
-    const int TAILLE=50;
-	char i_ligne[TAILLE];
+	char i_ligne[TAILLE_LIGNE];
 	int i=0;
-	bool ligneExiste = 0;
+	int etatLigne = -1;
+	int j = 0;
 
-	while ((fgets(i_ligne, TAILLE, fichier) != NULL) && (i<numeroLigne)) //parcoure le fichier jusqu'à la ligne n° numeroLigne (ou la fin)
-	{
-
-		if(i == numeroLigne-1)
-		{
+	while ((fgets(i_ligne, TAILLE_LIGNE, fichier) != NULL) && (i<numeroLigne)) { //parcoure le fichier jusqu'à la ligne n° numeroLigne (ou la fin)
+		if(i == numeroLigne-1) {
 			strcpy(ligne, i_ligne);
-			ligneExiste = 1;
+			while (i_ligne[j] == ' ') {
+				j += 1;
+			}
+			if (i_ligne[j] == '#' || i_ligne[j] == '\n') {
+				etatLigne = 0;
+			} else {
+				etatLigne = 1;
+			}
 		}
 		i++;
 	}
 	fclose(fichier);
 	//suppression du \n éventuel
-	if(ligneExiste)
-	{
+	if(etatLigne != -1) {
 		if(ligne[strlen(ligne)-1] == '\n')
 			ligne[strlen(ligne)-1] = 0;
 	}
-	
-	return ligneExiste;
+	return etatLigne;
 }
 
 //ecrit une ligne dans le fichier (gère le /n)
