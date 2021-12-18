@@ -1,5 +1,5 @@
 *.o
 *.txt
 main
-./vscode
+./vscode/
 Valeurs.xlsx
