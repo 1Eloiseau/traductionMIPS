@@ -19,7 +19,7 @@ void lecture_mot(char ligne[], char L[], int numero_mot){
     }
 
 
-    while (ligne[i] != ' ' && ligne[i] != '\0' && ligne[i] != '#' && ligne[i] != ',') {
+    while (ligne[i] != ' ' && ligne[i] != '\0' && ligne[i] != '#' && ligne[i] != ',' && ligne[i] != ':') {
         L[j] = ligne[i];
         i += 1;
         j += 1;
@@ -164,9 +164,7 @@ int offsetLabel(char ligne[], char nomFichier[], char label[]) {
     int i=0;
     char premierMot[TAILLE_LIGNE];
 printf("label[0] : %c\n", label[0]);
-    if (label[0]>64 && label[0]<123)
-    {
-        
+    if (label[0]>64 && label[0]<123) {
     }
     
     do {
