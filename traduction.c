@@ -1,7 +1,7 @@
 #include "fonctions.h"
 
 //L est le tableau dans lequel le mot numero_mot sera stocké. Donc si on a ligne [] = 'ADD R0, R1, R2' et on écrit lecture_mot (ligne, L, 2), le mot R0 qui est le second mot sera stocké dans la variable L.
-void lecture_mot(char ligne[], char L[], int numero_mot){  
+void lecture_mot(char ligne[], char L[], int numero_mot) {  
     int i = 0;
     int j = 0;
     while (ligne[i] == ' ') {
@@ -19,7 +19,7 @@ void lecture_mot(char ligne[], char L[], int numero_mot){
     }
 
 
-    while (ligne[i] != ' ' && ligne[i] != '\0' && ligne[i] != '#' && ligne[i] != ',' && ligne[i] != ':') {
+    while (ligne[i] != ' ' && ligne[i] != '\0' && ligne[i] != '#' && ligne[i] != ',' && ligne[i] != ':' && ligne[i] != '\r' && ligne[i] != '\t') {
         L[j] = ligne[i];
         i += 1;
         j += 1;
@@ -27,7 +27,6 @@ void lecture_mot(char ligne[], char L[], int numero_mot){
     L[j] = '\0';
 
 }
-
 
 //Regarde la chaîne de caractère contenue dans mot qui doit représenter un registre et retourne le numéro de ce registre
 int numero_registre(char mot[]) {  
@@ -117,6 +116,7 @@ int valeurDecimale (char S[]) {
     int rang = puissance(10, n-1);
     int nbr = 0;
     int chiffre;
+
     if(S[0]=='-') {
         i++;
         rang/=10;
@@ -127,16 +127,18 @@ int valeurDecimale (char S[]) {
         rang /= 10;
         i += 1;
     }
-    if(S[0]=='-') nbr = -nbr;
+    if(S[0]=='-') {
+        nbr = -nbr;
+    }
     return (nbr);
 }
 
 //Retourne un tableau contenant dans le premier élément les caractères hors parenthèse et en second élément celui dans les parenthèses. Si par exemple c'et écrit a0(4), le tableau offset sera base[0] = a0 et base[1]=4. S'il n'y a pas de décalage alors le 2nd élément du tableau sera une chaîne de caractères vide. 
-void parentheses (char base1[], int base2,  char mot[]) {
+void parentheses (char base1[], char base2[], char mot[]) {
     char mot_temp1[TAILLE_LIGNE];
     char mot_temp2[TAILLE_LIGNE];
-   // strcpy(mot_temp1, mot);
-   // strcpy(mot_temp2, mot);
+    // strcpy(mot_temp1, mot);
+    // strcpy(mot_temp2, mot);
     int i = 0;
     int j = 0;
 
@@ -146,25 +148,27 @@ void parentheses (char base1[], int base2,  char mot[]) {
     }
 
     mot_temp1[i] = '\0';
-    i++;
+    i += 1;
 
     while (mot[i] != ')') {
         mot_temp2[j] = mot[i];
         i += 1;
         j += 1;
     }
-    
+
     mot_temp2[j] = '\0'; 
+    
     strcpy(base1, mot_temp1);
-    base2 = valeurDecimale(mot_temp2);
+    strcpy(base2, mot_temp2);
 }
 
 //Retourne le numéro de ligne du label recherché.
 int offsetLabel(char ligne[], char nomFichier[], char label[]) {
     int i=0;
     char premierMot[TAILLE_LIGNE];
-printf("label[0] : %c\n", label[0]);
-    if (label[0]>64 && label[0]<123) {
+    if (label[0]>64 && label[0]<123)
+    {
+        
     }
     
     do {
@@ -498,11 +502,9 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
         inst_decimal = inst_decimal | variable2;
     } else if (!strcmp(operation, "BNE")) {
         inst_decimal = 335544320;
-               
         lecture_mot(ligne, string_temp1, 2);
         lecture_mot(ligne, string_temp2, 3);
         lecture_mot(ligne, string_temp3, 4);
-
 
         variable1 = numero_registre(string_temp1);
         variable2 = numero_registre(string_temp2);
@@ -522,9 +524,11 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
 
         variable1 = offsetLabel(ligne, fichier_source, string_temp1);
 
-        variable1 = (numero_ligne - variable1) * 4;
-
-        variable1 = variable1 << 11;
+        if (numero_ligne < variable1) {
+            variable1 = (numero_ligne - variable1 + 1) * 4;;
+        } else {
+            variable1 = (numero_ligne - variable1 - 1) * 4;
+        }
 
         inst_decimal = inst_decimal | variable1;
     } else if (!strcmp(operation, "JAL")) {
@@ -534,9 +538,11 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
 
         variable1 = offsetLabel(ligne, fichier_source, string_temp1);
 
-        variable1 = (numero_ligne - variable1) * 4;
-
-        variable1 = variable1 << 11;
+        if (numero_ligne < variable1) {
+            variable1 = (numero_ligne - variable1 + 1) * 4;;
+        } else {
+            variable1 = (numero_ligne - variable1 - 1) * 4;
+        }
 
         inst_decimal = inst_decimal | variable1;
     } else if (!strcmp(operation, "LUI")) {
@@ -561,8 +567,14 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
         lecture_mot(ligne, string_temp2, 3);
 
         variable1 = numero_registre(string_temp1);
-        
-        parentheses(label, variable3, string_temp2);
+
+        parentheses(label, string_temp3, string_temp2);
+
+        if (string_temp3[0] == '$') {
+            variable3 = numero_registre(string_temp3);
+        } else {
+            variable3 = valeurDecimale(string_temp3);
+        }
 
         variable2 = valeurDecimale(label);
 
@@ -579,8 +591,16 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
         lecture_mot(ligne, string_temp2, 3);
 
         variable1 = numero_registre(string_temp1);
-        parentheses(label, variable2, string_temp2);
+
+        parentheses(label, string_temp3, string_temp2);
+
         variable3 = valeurDecimale(label);
+
+        if (string_temp3[0] == '$') {
+            variable2 = numero_registre(string_temp3);
+        } else {
+            variable2 = valeurDecimale(string_temp3);
+        }
 
         variable1 = variable1 << 16;
         variable2 = variable2 << 21;
@@ -589,18 +609,17 @@ int traduction_dec (char ligne[], char fichier_source[], int numero_ligne) {
         inst_decimal = inst_decimal | variable1;
         inst_decimal = inst_decimal | variable2;
         inst_decimal = inst_decimal | variable3;
-}
+    }
 
     return (inst_decimal);
 }
 
 //Transforme un int en chaine de caractère hexa (de 8 caractères)
-void intEnChar(int instruction, char ligneHexa[])
-{
+void intEnChar(int instruction, char ligneHexa[]) {
 	const char hexa[] = "0123456789abcdef";
 	short aConvertir; //nombre sur 4bits à convertir en 1 caractere hexa
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i += 1)
 	{
 		aConvertir = instruction>>4*i;
 		aConvertir = aConvertir & 0x0000000F;
